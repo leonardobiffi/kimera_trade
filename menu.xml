@@ -62,6 +62,16 @@
               </menuitem>
         </menu>
     </menuitem>
+
+    <menuitem label='Trade'>
+        <icon>fa:bar-chart-o fa-fw</icon>
+        <menu>
+              <menuitem label='Operações'>
+                  <icon>fa:money fa-fw</icon>
+                  <action>OperacaoFormView</action>
+              </menuitem>
+        </menu>
+    </menuitem>
     
     <menuitem label='Logs'>
         <icon>fa:desktop fa-fw</icon>
