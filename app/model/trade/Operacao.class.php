@@ -25,7 +25,6 @@ class Operacao extends TRecord
         parent::addAttribute('data_realizacao');
         parent::addAttribute('id_parmoeda');
         parent::addAttribute('valor_entrada');
-        parent::addAttribute('valor_final');
         parent::addAttribute('valor_lucro');
         parent::addAttribute('payout');
         parent::addAttribute('id_usuario');
