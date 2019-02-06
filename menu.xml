@@ -70,6 +70,10 @@
                   <icon>fa:money fa-fw</icon>
                   <action>OperacaoFormView</action>
               </menuitem>
+              <menuitem label='Par Moeda'>
+                  <icon>fa:money fa-fw</icon>
+                  <action>ParMoedaList</action>
+              </menuitem>
         </menu>
     </menuitem>
     
