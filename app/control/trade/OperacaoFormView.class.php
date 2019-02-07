@@ -31,7 +31,7 @@ class OperacaoFormView extends TPage
         $parmoeda_descricao     = new TEntry('parmoeda_descricao');
         $payout                 = new TEntry('payout');
         $valor_entrada          = new TEntry('valor_entrada');
-        $valor_lucro            = new TEntry('total');
+        $valor_total            = new TEntry('valor_total');
         
         // add validators
         $id_parmoeda->addValidation('Par Moeda', new TRequiredValidator);
@@ -45,30 +45,35 @@ class OperacaoFormView extends TPage
         $parmoeda_descricao->style = 'font-size: 17pt';
         $payout->style = 'font-size: 17pt';
         $valor_entrada->style = 'font-size: 17pt';
+        $valor_total->style = 'font-size: 17pt';
         $id_parmoeda->button->style = 'margin-top:0px; vertical-align:top';
         
         // define some properties
         $id_parmoeda->setSize(50);
         $id_parmoeda->setAuxiliar($parmoeda_descricao);
         $parmoeda_descricao->setEditable(FALSE);
+        $valor_total->setEditable(FALSE);
         $parmoeda_descricao->setSize(150);
         $valor_entrada->setNumericMask(2, ',', '.');
+        $valor_total->setNumericMask(2, ',', '.');
         $valor_entrada->setSize(225);
         
         // create the field labels
         $lab_pro = new TLabel('Par Moeda');
         $lab_pri = new TLabel('Payout %');
         $lab_amo = new TLabel('Entrada');
+        $lab_tot = new TLabel('Total');
         $lab_pro->setFontSize(17);
         $lab_pri->setFontSize(17);
         $lab_amo->setFontSize(17);
+        $lab_tot->setFontSize(17);
         $lab_pro->setFontColor('red');
         $lab_amo->setFontColor('red');
         $this->form->addField($parmoeda_descricao);
         
         // add the form fields
         $this->form->addFields([$lab_pro], [$id_parmoeda], [$lab_pri], [$payout]);
-        $this->form->addFields([$lab_amo], [$valor_entrada]);
+        $this->form->addFields([$lab_amo], [$valor_entrada], [$lab_tot], [$valor_total]);
         $btnWin = $this->form->addAction('WIN&ensp;', new TAction(array($this, 'onSave')),'fa:caret-up');
         $btnLoss = $this->form->addAction('LOSS', new TAction(array($this, 'onSaveLoss')), 'fa:caret-down');
         //$this->form->addAction('Clear', new TAction(array($this, 'onClear')),   'fa:trash red');
@@ -358,6 +363,18 @@ class OperacaoFormView extends TPage
                 }
             }
             $this->loaded = true;
+
+            $repo = new TRepositorySum('Operacao'); 
+            $object = $repo->sum(NULL, array('valor_total' => 'valor_lucro'));
+            
+            $data = new stdClass;
+            $data->valor_total = $object->valor_total;
+            
+            TForm::sendData('form_operacao', $data);
+
+
+            TTransaction::close();
+
         }
         catch (Exception $e) // in case of exception
         {

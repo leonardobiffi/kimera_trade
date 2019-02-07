@@ -36,6 +36,7 @@ class AdiantiClassMap
         $classPath['TDatabase']                  = 'lib/adianti/database/TDatabase.php';
         $classPath['TRecord']                    = 'lib/adianti/database/TRecord.php';
         $classPath['TRepository']                = 'lib/adianti/database/TRepository.php';
+        $classPath['TRepositorySum']             = 'lib/adianti/database/TRepositorySum.php';
         $classPath['TSqlDelete']                 = 'lib/adianti/database/TSqlDelete.php';
         $classPath['TSqlInsert']                 = 'lib/adianti/database/TSqlInsert.php';
         $classPath['TSqlMultiInsert']            = 'lib/adianti/database/TSqlMultiInsert.php';
