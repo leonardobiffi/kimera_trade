@@ -74,6 +74,10 @@
                   <icon>fa:money fa-fw</icon>
                   <action>ParMoedaList</action>
               </menuitem>
+              <menuitem label='Transações'>
+                  <icon>fa:exchange fa-fw</icon>
+                  <action>TransacaoList</action>
+              </menuitem>
         </menu>
     </menuitem>
     
