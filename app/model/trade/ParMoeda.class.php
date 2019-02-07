@@ -1,6 +1,6 @@
 <?php
 /**
- * SystemProgram
+ * ParMoeda
  *
  * @version    1.0
  * @package    model

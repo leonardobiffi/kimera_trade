@@ -4,11 +4,10 @@
  *
  * @version    1.0
  * @package    control
- * @subpackage admin
- * @author     Pablo Dall'Oglio
- * @copyright  Copyright (c) 2006 Adianti Solutions Ltd. (http://www.adianti.com.br)
- * @license    http://www.adianti.com.br/framework-license
+ * @subpackage trade
+ * @author     Leonardo Biffi
  */
+
 class ParMoedaList extends TStandardList
 {
     protected $form;     // registration form
