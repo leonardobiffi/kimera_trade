@@ -55,7 +55,6 @@ class OperacaoFormView extends TPage
         $valor_total->setEditable(FALSE);
         $parmoeda_descricao->setSize(150);
         $valor_entrada->setNumericMask(2, ',', '.');
-        $valor_total->setNumericMask(2, ',', '.');
         $valor_entrada->setSize(225);
         
         // create the field labels
@@ -365,10 +364,17 @@ class OperacaoFormView extends TPage
             $this->loaded = true;
 
             $repo = new TRepositorySum('Operacao'); 
-            $object = $repo->sum(NULL, array('valor_total' => 'valor_lucro'));
+            $object_op = $repo->sum(NULL, array('valor_op' => 'valor_lucro'));
+
+            $repo = new TRepositorySum('Transacao'); 
+            $object_tran = $repo->sum(NULL, array('valor_tran' => 'valor'));
+
+            $total = $object_op->valor_op + $object_tran->valor_tran;
+
+            var_dump( );
             
             $data = new stdClass;
-            $data->valor_total = $object->valor_total;
+            $data->valor_total = 'R$ ' . number_format($total, 2, ',', '.');
             
             TForm::sendData('form_operacao', $data);
 
