@@ -78,6 +78,10 @@
                   <icon>fa:exchange fa-fw</icon>
                   <action>TransacaoList</action>
               </menuitem>
+              <menuitem label='Histórico'>
+                  <icon>fa:history fa-fw</icon>
+                  <action>HistoricoList</action>
+              </menuitem>
         </menu>
     </menuitem>
     
