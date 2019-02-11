@@ -39,7 +39,7 @@ class HistoricoList extends TStandardList
         // add the fields
         $this->form->addFields( [new TLabel('Data')], [$data_realizacao] );
 
-        $data_realizacao->setSize('20%');
+        $data_realizacao->setSize('50%');
         
         // keep the form filled during navigation with session data
         $this->form->setData( TSession::getValue('Historico_filter_data') );
@@ -57,6 +57,8 @@ class HistoricoList extends TStandardList
         // creates the datagrid columns
         $column_data = new TDataGridColumn('data_realizacao', 'Data', 'left');
         $column_valor = new TDataGridColumn('valor_lucro', 'Valor', 'left');
+        $column_win = new TDataGridColumn('win', 'WIN', 'center');
+        $column_loss = new TDataGridColumn('loss', 'LOSS', 'center');
         
 
         // transformer
@@ -65,6 +67,8 @@ class HistoricoList extends TStandardList
         // add the columns to the DataGrid
         $this->datagrid->addColumn($column_data);
         $this->datagrid->addColumn($column_valor);
+        $this->datagrid->addColumn($column_win);
+        $this->datagrid->addColumn($column_loss); 
 
         // creates the datagrid column actions     
         $order_data = new TAction(array($this, 'onReload'));
