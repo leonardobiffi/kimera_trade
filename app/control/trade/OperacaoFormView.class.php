@@ -27,7 +27,7 @@ class OperacaoFormView extends TPage
         $this->form->setFormTitle('Operações');
         
         // create the form fields
-        $id_parmoeda            = new TDBSeekButton('id_parmoeda', 'database', 'form_operacao', 'ParMoeda', 'descricao');
+        $id_parmoeda            = new TDBCombo('id_parmoeda', 'database', 'ParMoeda', 'id','descricao','id');
         $parmoeda_descricao     = new TEntry('parmoeda_descricao');
         $payout                 = new TEntry('payout');
         $valor_entrada          = new TEntry('valor_entrada');
@@ -36,10 +36,6 @@ class OperacaoFormView extends TPage
         // add validators
         $id_parmoeda->addValidation('Par Moeda', new TRequiredValidator);
 
-        $valor_entrada->setExitAction(new TAction(array($this, 'onUpdateFinal')));
-        $payout->setExitAction(new TAction(array($this, 'onUpdateFinal')));
-        $id_parmoeda->setExitAction(new TAction(array($this, 'onUpdateFinal')));
-        
         // define some attributes
         $id_parmoeda->style = 'font-size: 17pt';
         $parmoeda_descricao->style = 'font-size: 17pt';
@@ -49,13 +45,14 @@ class OperacaoFormView extends TPage
         $id_parmoeda->button->style = 'margin-top:0px; vertical-align:top';
         
         // define some properties
-        $id_parmoeda->setSize(50);
-        $id_parmoeda->setAuxiliar($parmoeda_descricao);
+        $id_parmoeda->setSize('100%');
+        $id_parmoeda->enableSearch();
+        //$id_parmoeda->setAuxiliar($parmoeda_descricao);
         $parmoeda_descricao->setEditable(FALSE);
         $valor_total->setEditable(FALSE);
         $parmoeda_descricao->setSize(150);
         $valor_entrada->setNumericMask(2, ',', '.');
-        $valor_entrada->setSize(225);
+        $valor_entrada->setSize('100%');
         
         // create the field labels
         $lab_pro = new TLabel('Par Moeda');
@@ -100,9 +97,17 @@ class OperacaoFormView extends TPage
         $payout->setTransformer(array($this, 'formatPorc'));
         
         
-        $this->datagrid->addQuickAction('Delete', $a3=new TDataGridAction(array($this, 'onDelete')), 'id_parmoeda', 'fa:trash red');
+        //$this->datagrid->addQuickAction('Delete', $a3=new TDataGridAction(array($this, 'onDelete')), 'id_parmoeda', 'fa:trash red');
+        
+        // create DELETE action
+        $action_del = new TDataGridAction(array($this, 'onDelete'));
+        $action_del->setButtonClass('btn btn-default');
+        $action_del->setLabel(_t('Delete'));
+        $action_del->setImage('fa:trash-o red fa-lg');
+        $action_del->setField('id');
+        $this->datagrid->addAction($action_del);
+
         $this->datagrid->createModel();
-        $a3->setParameter('register_state', 'false');
         
         // wrap the page content using vertical box
         $vbox = new TVBox;
@@ -304,33 +309,6 @@ class OperacaoFormView extends TPage
     }
     
     /**
-     * Update the total based on the sale price, amount
-     */
-    public static function onUpdateFinal($param)
-    {
-        $payout             = $param['payout'];
-        $valor_entrada      = $param['valor_entrada'];
-        
-        $obj = new StdClass;
-        $obj->valor_final = number_format( (($valor_entrada * $payout) / 100) + $valor_entrada, 2, ',', '.');
-        TForm::sendData('form_operacao', $obj);
-    }
-    
-    /**
-     * Remove a product from the cart
-     */
-    public function onDelete($param)
-    {
-        // get the cart objects from session
-        $items = TSession::getValue('items');
-        unset($items[ $param['key'] ]); // remove the product from the array
-        TSession::setValue('items', $items); // put the array back to the session
-        
-        // reload datagrid
-        $this->onReload( func_get_arg(0) );
-    }
-    
-    /**
      * Reload the datagrid with the objects from the session
      */
     function onReload($param = NULL)
@@ -388,6 +366,54 @@ class OperacaoFormView extends TPage
         }
     }
     
+    /**
+     * Ask before deletion
+     */
+    public function onDelete($param)
+    {
+        // define the delete action
+        $action = new TAction(array($this, 'Delete'));
+        $action->setParameters($param); // pass the key parameter ahead
+        
+        // shows a dialog to the user
+        new TQuestion(AdiantiCoreTranslator::translate('Do you really want to delete ?'), $action);
+    }
+
+    /**
+     * Delete a record
+     */
+    public function Delete($param)
+    {
+        try
+        {
+            // get the parameter $key
+            $key=$param['key'];
+            // open a transaction with database
+            TTransaction::open('database');
+            
+            // instantiates object
+            $object = new Operacao($key);
+            
+            // deletes the object from the database
+            $object->delete();
+            
+            // close the transaction
+            TTransaction::close();
+            
+            // reload the listing
+            $this->onReload( $param );
+            // shows the success message
+            new TMessage('info', AdiantiCoreTranslator::translate('Record deleted'));
+        }
+        catch (Exception $e) // in case of exception
+        {
+            // shows the exception error message
+            new TMessage('error', $e->getMessage());
+            // undo all pending operations
+            TTransaction::rollback();
+        }
+    }
+
     /**
      * Show the page
      */

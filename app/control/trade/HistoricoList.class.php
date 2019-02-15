@@ -27,22 +27,24 @@ class HistoricoList extends TStandardList
         parent::setDatabase('database');            // defines the database
         parent::setActiveRecord('ViewHistorico');   // defines the active record
         parent::setDefaultOrder('data_realizacao', 'asc');         // defines the default order
-        parent::addFilterField('data_realizacao', 'like', 'data_realizacao'); // filterField, operator, formField
+        parent::addFilterField('data_realizacao', '>=', 'data_inicio'); // filterField, operator, formField
+        parent::addFilterField('data_realizacao', '<=', 'data_final'); // filterField, operator, formField
         
         // creates the form
-        $this->form = new BootstrapFormBuilder('form_search_Historico');
+        $this->form = new BootstrapFormBuilder('form_search_ViewHistorico');
         $this->form->setFormTitle('Histórico');
         
         // create the form fields
-        $data_realizacao = new TDate('data_realizacao');
+        $data_inicio = new TDate('data_inicio');
+        $data_final = new TDate('data_final');
         
         // add the fields
-        $this->form->addFields( [new TLabel('Data')], [$data_realizacao] );
+        $this->form->addFields( [new TLabel('Início')], [$data_inicio] );
+        $this->form->addFields( [new TLabel('Final')], [$data_final] );
 
-        $data_realizacao->setSize('50%');
         
         // keep the form filled during navigation with session data
-        $this->form->setData( TSession::getValue('Historico_filter_data') );
+        $this->form->setData( TSession::getValue('ViewHistorico_filter_data') );
         
         // add the search form actions
         $btn = $this->form->addAction(_t('Find'), new TAction(array($this, 'onSearch')), 'fa:search');
@@ -59,16 +61,20 @@ class HistoricoList extends TStandardList
         $column_valor = new TDataGridColumn('valor_lucro', 'Valor', 'left');
         $column_win = new TDataGridColumn('win', 'WIN', 'center');
         $column_loss = new TDataGridColumn('loss', 'LOSS', 'center');
-        
 
         // transformer
         $column_valor->setTransformer(array($this, 'formatValue'));
+        $column_data->setTransformer(array($this, 'formatDate'));
 
         // add the columns to the DataGrid
         $this->datagrid->addColumn($column_data);
-        $this->datagrid->addColumn($column_valor);
         $this->datagrid->addColumn($column_win);
         $this->datagrid->addColumn($column_loss); 
+        $this->datagrid->addColumn($column_valor);
+
+        $column_valor->setTotalFunction( function($values) {
+            return array_sum((array) $values);
+        });
 
         // creates the datagrid column actions     
         $order_data = new TAction(array($this, 'onReload'));
@@ -113,5 +119,14 @@ class HistoricoList extends TStandardList
             $row->style = "background: #F6D8CE";
             return "<span style='color:red'>$number</span>";
         }
+    }
+
+    /**
+     * Format the date according to the country
+     */
+    public function formatDate($column_date, $object)
+    {
+        $date = new DateTime($column_date);
+        return $date->format('d/m/Y');
     }
 }

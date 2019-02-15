@@ -29,4 +29,19 @@ class Operacao extends TRecord
         parent::addAttribute('payout');
         parent::addAttribute('id_usuario');
     }
+
+    /**
+     * Delete the object and its aggregates
+     * @param $id object ID
+     */
+    public function delete($id = NULL)
+    {
+        // delete the related System_groupSystem_program objects
+        $id = isset($id) ? $id : $this->id;
+        
+        Operacao::where('id', '=', $id)->delete();
+        
+        // delete the object itself
+        parent::delete($id);
+    }
 }
