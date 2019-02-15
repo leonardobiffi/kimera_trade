@@ -343,14 +343,14 @@ class OperacaoFormView extends TPage
             $this->loaded = true;
 
             $repo = new TRepositorySum('Operacao'); 
-            $object_op = $repo->sum(NULL, array('valor_op' => 'valor_lucro'));
+            $criteria_op = new TCriteria();
+            $criteria_op->add(new TFilter('id_usuario', '=', TSession::getValue('userid')));
+            $object_op = $repo->sum($criteria_op, array('valor_op' => 'valor_lucro'));
 
             $repo = new TRepositorySum('Transacao'); 
-            $object_tran = $repo->sum(NULL, array('valor_tran' => 'valor'));
+            $object_tran = $repo->sum($criteria_op, array('valor_tran' => 'valor'));
 
             $total = $object_op->valor_op + $object_tran->valor_tran;
-
-            var_dump( );
             
             $data = new stdClass;
             $data->valor_total = 'R$ ' . number_format($total, 2, ',', '.');
