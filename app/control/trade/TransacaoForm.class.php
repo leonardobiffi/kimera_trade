@@ -61,4 +61,62 @@ class TransacaoForm extends TStandardForm
         
         parent::add($container);
     }
+
+    /**
+     * method onSave()
+     * Executed whenever the user clicks at the save button
+     */
+    public function onSave()
+    {
+        try
+        {
+            if (empty($this->database))
+            {
+                throw new Exception(AdiantiCoreTranslator::translate('^1 was not defined. You must call ^2 in ^3', AdiantiCoreTranslator::translate('Database'), 'setDatabase()', AdiantiCoreTranslator::translate('Constructor')));
+            }
+            
+            if (empty($this->activeRecord))
+            {
+                throw new Exception(AdiantiCoreTranslator::translate('^1 was not defined. You must call ^2 in ^3', 'Active Record', 'setActiveRecord()', AdiantiCoreTranslator::translate('Constructor')));
+            }
+            
+            // open a transaction with database
+            TTransaction::open($this->database);
+            
+            // get the form data
+            $object = $this->form->getData($this->activeRecord);
+            $object->id_usuario = TSession::getValue('userid');
+            
+            // validate data
+            $this->form->validate();
+            
+            // stores the object
+            $object->store();
+            
+            // fill the form with the active record data
+            $this->form->setData($object);
+            
+            // close the transaction
+            TTransaction::close();
+            
+            // shows the success message
+            new TMessage('info', AdiantiCoreTranslator::translate('Record saved'), $this->afterSaveAction);
+            
+            return $object;
+        }
+        catch (Exception $e) // in case of exception
+        {
+            // get the form data
+            $object = $this->form->getData();
+            
+            // fill the form with the active record data
+            $this->form->setData($object);
+            
+            // shows the exception error message
+            new TMessage('error', $e->getMessage());
+            
+            // undo all pending operations
+            TTransaction::rollback();
+        }
+    }
 }

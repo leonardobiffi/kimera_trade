@@ -325,6 +325,7 @@ class OperacaoFormView extends TPage
             $criteria = new TCriteria();
             $criteria->setProperty('order', 'data_realizacao desc');
             $criteria->add(new TFilter("date(data_realizacao)","=",date('Y-m-d')));
+            $criteria->add(new TFilter("id_usuario","=",TSession::getValue('userid')));
 
             // load the objects according to criteria
             $items = $repository->load($criteria);

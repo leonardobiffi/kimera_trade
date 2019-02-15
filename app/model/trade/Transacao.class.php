@@ -25,6 +25,7 @@ class Transacao extends TRecord
         parent::addAttribute('descricao');
         parent::addAttribute('valor');
         parent::addAttribute('data_transacao');
+        parent::addAttribute('id_usuario');
     }
 
 }

@@ -129,4 +129,115 @@ class HistoricoList extends TStandardList
         $date = new DateTime($column_date);
         return $date->format('d/m/Y');
     }
+
+    /**
+     * Load the datagrid with the database objects
+     */
+    public function onReload($param = NULL)
+    {
+        try
+        {
+            if (empty($this->database))
+            {
+                throw new Exception(AdiantiCoreTranslator::translate('^1 was not defined. You must call ^2 in ^3', AdiantiCoreTranslator::translate('Database'), 'setDatabase()', AdiantiCoreTranslator::translate('Constructor')));
+            }
+            
+            if (empty($this->activeRecord))
+            {
+                throw new Exception(AdiantiCoreTranslator::translate('^1 was not defined. You must call ^2 in ^3', 'Active Record', 'setActiveRecord()', AdiantiCoreTranslator::translate('Constructor')));
+            }
+            
+            // open a transaction with database
+            TTransaction::open($this->database);
+            
+            // instancia um repositório
+            $repository = new TRepository($this->activeRecord);
+            $limit = isset($this->limit) ? ( $this->limit > 0 ? $this->limit : NULL) : 10;
+            
+            // creates a criteria
+            $criteria = isset($this->criteria) ? clone $this->criteria : new TCriteria;
+            if ($this->order)
+            {
+                $criteria->setProperty('order',     $this->order);
+                $criteria->setProperty('direction', $this->direction);
+            }
+            
+            $criteria->setProperties($param); // order, offset
+            $criteria->setProperty('limit', $limit);
+
+            $criteria->add(new TFilter('id_usuario', '=', TSession::getValue('userid')));
+            
+            if ($this->formFilters)
+            {
+                foreach ($this->formFilters as $filterKey => $filterField)
+                {
+                    $logic_operator = isset($this->logic_operators[$filterKey]) ? $this->logic_operators[$filterKey] : TExpression::AND_OPERATOR;
+                    
+                    if (TSession::getValue($this->activeRecord.'_filter_'.$filterField))
+                    {
+                        // add the filter stored in the session to the criteria
+                        $criteria->add(TSession::getValue($this->activeRecord.'_filter_'.$filterField), $logic_operator);
+                    }
+                }
+            }
+            
+            // load the objects according to criteria
+            $objects = $repository->load($criteria, FALSE);
+            
+            if (is_callable($this->transformCallback))
+            {
+                call_user_func($this->transformCallback, $objects, $param);
+            }
+            
+            $this->datagrid->clear();
+            if ($objects)
+            {
+                // iterate the collection of active records
+                foreach ($objects as $object)
+                {
+                    // add the object inside the datagrid
+                    $this->datagrid->addItem($object);
+                }
+            }
+            
+            // reset the criteria for record count
+            $criteria->resetProperties();
+            $count= $repository->count($criteria);
+            
+            if (isset($this->pageNavigation))
+            {
+                $this->pageNavigation->setCount($count); // count of records
+                $this->pageNavigation->setProperties($param); // order, page
+                $this->pageNavigation->setLimit($limit); // limit
+            }
+            
+            if ($this->totalRow)
+            {
+                $tfoot = new TElement('tfoot');
+                $tfoot->{'class'} = 'tdatagrid_footer';
+                $row = new TElement('tr');
+                $tfoot->add($row);
+                $this->datagrid->add($tfoot);
+                
+                $row->{'style'} = 'height: 30px';
+                $cell = new TElement('td');
+                $cell->add( $count . ' ' . AdiantiCoreTranslator::translate('Records'));
+                $cell->{'colspan'} = $this->datagrid->getTotalColumns();
+                $cell->{'style'} = 'text-align:center';
+                
+                $row->add($cell);
+            }
+            
+            // close the transaction
+            TTransaction::close();
+            $this->loaded = true;
+        }
+        catch (Exception $e) // in case of exception
+        {
+            // shows the exception error message
+            new TMessage('error', $e->getMessage());
+            // undo all pending operations
+            TTransaction::rollback();
+        }
+    }
 }
