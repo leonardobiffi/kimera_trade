@@ -67,6 +67,7 @@ class TransacaoList extends TStandardList
 
         // transformer
         $column_valor->setTransformer(array($this, 'formatValue'));
+        $column_data->setTransformer(array($this, 'formatDate'));
 
         // add the columns to the DataGrid
         $this->datagrid->addColumn($column_id);
@@ -249,5 +250,14 @@ class TransacaoList extends TStandardList
             // undo all pending operations
             TTransaction::rollback();
         }
+    }
+
+    /**
+     * Format the date according to the country
+     */
+    public function formatDate($column_date, $object)
+    {
+        $date = new DateTime($column_date);
+        return $date->format('d/m/Y');
     }
 }
